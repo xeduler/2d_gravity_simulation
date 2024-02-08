@@ -3,7 +3,7 @@ import pygame
 import time
 import copy
 import random
-from math import sqrt
+from math import sqrt, pi
 
 WIDTH = 1000
 HIGHT = 1000
@@ -13,7 +13,7 @@ pygame.init()
 surface = pygame.display.set_mode((WIDTH, HIGHT), pygame.RESIZABLE)
 clock = pygame.time.Clock()
 
-PI = 3.1415926
+PI = pi
 G = 6.67385#e-11
 focus = 0
 show_vectors = 0
@@ -21,7 +21,7 @@ show_orbits = 0
 SCALE = 4
 MOVEX = WIDTH / 2
 MOVEY = HIGHT / 2
-SPEED = 10
+SPEED = 1
 MIN_SPEED = 0
 MAX_SPEED = 100
 VECTOR_SIZE = 100
@@ -37,7 +37,7 @@ objects = [
 {'mass': 10, 'r': 10, 'color': [200, 200, 200], 'x': 700, 'y': 0, 'vx': 0, 'vy': -3, 'del': 0}
 ]
 
-for i in range(50):
+for i in range(100):
     objects.append(copy.deepcopy(objects[i]))
 
 
@@ -52,51 +52,17 @@ def fill_random():
         object['color'] = rndcolor
         object['mass'] = random.randint(100, 500)
         object['r'] = radius(object['mass'])
-        object['x'] = random.randint(-1000, 1000)
-        object['y'] = random.randint(-1000, 1000)
+        object['x'] = random.randint(-2000, 2000)
+        object['y'] = random.randint(-2000, 2000)
         object['vx'] = (random.random() - random.randint(0, 1))#*10 #objects[i]['y'] / 100 * -1#
         object['vy'] = (random.random() - random.randint(0, 1))#*10 #objects[i]['x'] / 100 * -1#
 
 
-    #objects[0]['mass'] = 7.36e22
-    #objects[0]['r'] = 1737100
-    #objects[0]['color'] = (255, 255, 255)
-    #objects[0]['x'] = 0
-    #objects[0]['y'] = 0
-    #objects[0]['vx'] = 0
-    #objects[0]['vy'] = 0
-
-    #objects[1]['mass'] = 65
-    #objects[1]['r'] = 2
-    #objects[1]['color'] = (255, 200, 200)
-    #objects[1]['x'] = 0
-    #objects[1]['y'] = -1737200
-    #objects[1]['vx'] = 0
-    #objects[1]['vy'] = 0
-
-    #objects[1]['mass'] = 65
-    #objects[1]['r'] = 2
-    #objects[1]['color'] = (255, 200, 200)
-    #objects[1]['x'] = 0
-    #objects[1]['y'] = -9737100
-    #objects[1]['vx'] = 1250/2
-    #objects[1]['vy'] = 0
-
-    #objects[2]['mass'] = 100
-    #objects[2]['r'] = 4
-    #objects[2]['color'] = (255, 200, 200)
-    #objects[2]['x'] = 0
-    #objects[2]['y'] = 1737100 + 2422000
-    #objects[2]['vx'] = -138 * 7
-    #objects[2]['vy'] = 0
 
 
 fill_random()
-
-
-
-
 tmpobjects = copy.deepcopy(objects)
+
 
 def disp():
     if not show_orbits:
@@ -133,16 +99,7 @@ def velocity(I, E, T):
             TMPI['vx'] += gamma * percent(squaredist, squarex) * (distx / abs(distx))
         if squarey != 0 and disty != 0:
             TMPI['vy'] += gamma * percent(squaredist, squarey) * (disty / abs(disty))
-    else:
-        #абсолютно неупругий удар
-        TMPI['vx'] = (I['mass']*TMPI['vx'] + E['mass']*E['vx'])/(I['mass']+E['mass'])
-        TMPI['vy'] = (I['mass']*TMPI['vy'] + E['mass']*E['vy'])/(I['mass']+E['mass'])
-        #абсолютно упругий удар
-        #TMPI['vx'] = (2 * E['mass'] * E['vx'] + I['vx'] * (I['mass'] - E['mass'])) / (I['mass'] + E['mass'])
-        #TMPI['vy'] = (2 * E['mass'] * E['vy'] + I['vy'] * (I['mass'] - E['mass'])) / (I['mass'] + E['mass'])
-        #абсолютно упругий удар - 10% энергии
-        #TMPI['vx'] = (2 * E['mass'] * E['vx'] + I['vx'] * (I['mass'] - E['mass'])) / (I['mass'] + E['mass']) / 1.1
-        #TMPI['vy'] = (2 * E['mass'] * E['vy'] + I['vy'] * (I['mass'] - E['mass'])) / (I['mass'] + E['mass']) / 1.1
+            
     return(TMPI)
 
 def position(I):
@@ -154,18 +111,9 @@ def percent(percent_full, percent_part):
     return 1 / percent_full * percent_part
 
 
-#check = [
-#{'mass': 7.36e22, 'r': 100, 'color': 0, 'x': 0, 'y': 1, 'vx': 0, 'vy': 0, 'del': 0},
-#{'mass': 65, 'r': 10, 'color': 0, 'x': 1737100, 'y': 1, 'vx': 0, 'vy': 0, 'del': 0},
-#{'mass': 0, 'r': 0, 'color': 0, 'x': 0, 'y': 1, 'vx': 0, 'vy': 0, 'del': 0}
-#]
-#print(velocity(check[1], check[0], check[0]))
 
-
-
-
-
-while(True):
+def event_handler():
+    global WIDTH, HIGHT, MOVEX, MOVEY, SCALE, SPEED, focus
     for e in pygame.event.get():
         if e.type == pygame.QUIT:
             exit()
@@ -230,6 +178,8 @@ while(True):
                 show_orbits = not show_orbits
 
 
+while(True):
+    event_handler()
 
 
     for object in objects:
@@ -256,7 +206,7 @@ while(True):
                         object['r'] = radius(object['mass'])
                         object['vx'] = (object['mass']*object['vx'] + another['mass']*another['vx'])/(object['mass']+another['mass'])
                         object['vy'] = (object['mass']*object['vy'] + another['mass']*another['vy'])/(object['mass']+another['mass'])
-                        #another['mass'] = 0
+
                         another['vx'] = 0
                         another['vy'] = 0
                         another['del'] = 1
@@ -265,7 +215,7 @@ while(True):
                         another['r'] = radius(another['mass'])
                         another['vx'] = (another['mass']*another['vx'] + object['mass']*object['vx'])/(another['mass']+object['mass'])
                         another['vy'] = (another['mass']*another['vy'] + object['mass']*object['vy'])/(another['mass']+object['mass'])
-                        #object['mass'] = 0
+
                         object['vx'] = 0
                         object['vy'] = 0
                         object['del'] = 1
@@ -277,4 +227,4 @@ while(True):
 
 
     disp()
-    time.sleep(SPEED/100)
+    time.sleep(SPEED)
